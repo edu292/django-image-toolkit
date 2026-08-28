@@ -1,9 +1,9 @@
 from typing import Any
 
-from django.forms import FileInput
+from django import forms
 
 
-class PreviewImageInput(FileInput):
+class PreviewImageInput(forms.FileInput):
     template_name = 'image_toolkit/preview_image_input.html'
 
     def __init__(self, attrs=None, placeholder=None):
@@ -19,7 +19,7 @@ class PreviewImageInput(FileInput):
         return value
 
 
-class CamImageInput(FileInput):
+class CamImageInput(forms.FileInput):
     template_name = 'image_toolkit/cam_image_input.html'
 
     def __init__(self, capture_width=1920, capture_height=1080, attrs=None):
@@ -41,3 +41,17 @@ class CamImageInput(FileInput):
 
     def format_value(self, value):
         return value
+
+
+class ResizableImageWidget(forms.MultiWidget):
+    def __init__(self, attrs=None):
+        widgets = (
+            forms.FileInput(attrs={'accept': 'image/*'}),
+            forms.NumberInput(attrs={'placeholder': 'Max Width (px)', 'min': 1}),
+            forms.NumberInput(attrs={'placeholder': 'Max Height (px)', 'min': 1}),
+            forms.NumberInput(attrs={'placeholder': 'Quality (1-100)', 'min': 1, 'max': 100}),
+        )
+        super().__init__(widgets, attrs)
+
+    def decompress(self, value):
+        return [value, None, None, 80] if value else [None, None, None, 80]
