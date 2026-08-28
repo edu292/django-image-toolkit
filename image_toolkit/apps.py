@@ -2,8 +2,8 @@ from django.apps import AppConfig
 from django.db.models import FileField
 
 
-class SmartImageConfig(AppConfig):
-    name = 'smart_image'
+class ImageToolkitConfig(AppConfig):
+    name = 'image_toolkit'
 
     def ready(self) -> None:
         from django.apps import apps

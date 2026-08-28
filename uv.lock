@@ -133,8 +133,8 @@ wheels = [
 ]
 
 [[package]]
-name = "django-smart-image"
-version = "0.1.9"
+name = "django-image-tookit"
+version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "django" },
