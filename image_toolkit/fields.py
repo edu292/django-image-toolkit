@@ -3,15 +3,13 @@ import math
 from pathlib import Path
 from typing import Any
 
-from django import forms
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import ImageField
 from django.utils.translation import gettext_lazy as _
 from PIL import Image
 
-from .widgets import ResizableImageWidget
+from .formfields import ResizableImageFormField
 
 
 def is_float(str: Any):
@@ -170,43 +168,29 @@ class WebPAutoCropField(ImageDimensionMixin, WebPImageField):
         return img
 
 
-class DynamicImageFormField(forms.MultiValueField):
-    widget = ResizableImageWidget
+class DynamicWebPImageField(ImageField):
+    def __init__(self, allow_resize=True, allow_quality=True, default_quality=80, *args, **kwargs):
+        self.allow_resize = allow_resize
+        self.allow_quality = allow_quality
+        self.default_quality = default_quality
+        super().__init__(*args, **kwargs)
 
-    def __init__(self, **kwargs):
-        fields = (
-            forms.ImageField(required=kwargs.get('required', True)),
-            forms.IntegerField(required=False, min_value=1),
-            forms.IntegerField(required=False, min_value=1),
-            forms.IntegerField(required=False, min_value=1, max_value=100),
-        )
-        super().__init__(fields, require_all_fields=False, **kwargs)
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        if not self.allow_resize:
+            kwargs['allow_resize'] = self.allow_resize
+        if not self.allow_quality:
+            kwargs['allow_quality'] = self.allow_quality
+        if self.default_quality != 80:
+            kwargs['default_quality'] = self.default_quality
+        return name, path, args, kwargs
 
-    def compress(self, data_list):
-        if not data_list or not data_list[0]:
-            return None
-
-        img_file, max_width, max_height, quality = data_list
-        quality = quality or 80
-
-        if not hasattr(img_file, 'read'):
-            return img_file
-
-        img = Image.open(img_file)
-
-        if img.mode in ('RGBA', 'P'):
-            img = img.convert('RGBA')
-        elif img.mode != 'RGB':
-            img = img.convert('RGB')
-
-        if max_width or max_height:
-            target_w = max_width or img.width
-            target_h = max_height or img.height
-            img.thumbnail((target_w, target_h), Image.Resampling.LANCZOS)
-
-        output = io.BytesIO()
-        img.save(output, format='WEBP', quality=quality)
-        output.seek(0)
-
-        new_name = Path(img_file.name).with_suffix('.webp').name
-        return SimpleUploadedFile(new_name, output.read(), content_type='image/webp')
+    def formfield(self, **kwargs):
+        defaults = {
+            'form_class': ResizableImageFormField,
+            'allow_resize': self.allow_resize,
+            'allow_quality': self.allow_quality,
+            'default_quality': self.default_quality,
+        }
+        defaults.update(kwargs)
+        return super().formfield(**defaults)

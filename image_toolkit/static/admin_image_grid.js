@@ -17,23 +17,24 @@ document.addEventListener("click", (e) => {
   }
 });
 
-function saveEdit(e) {
-  const form = e.target.closest("form");
-  const saveButton = form.querySelector('input[name="_save"]');
-
-  form.requestSubmit(saveButton);
-}
-
 document.addEventListener("focusout", (e) => {
   if (!e.target.matches(".image-card__input")) return;
+
   const group = e.target.closest(".image-card__name-group");
   group.classList.remove("image-card__name-group--editing");
-  saveEdit(e);
+
+  const titleSpan = group.querySelector(".image-card__title");
+  titleSpan.textContent = e.target.value;
+  titleSpan.title = e.target.value;
 });
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && e.target.matches(".image-card__input")) {
     e.preventDefault();
-    saveEdit(e);
+
+    const form = e.target.closest("form");
+    const saveButton = form.querySelector('input[name="_save"]');
+
+    form.requestSubmit(saveButton);
   }
 });

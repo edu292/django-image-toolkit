@@ -44,14 +44,19 @@ class CamImageInput(forms.FileInput):
 
 
 class ResizableImageWidget(forms.MultiWidget):
-    def __init__(self, attrs=None):
+    def __init__(self, allow_resize=True, allow_quality=True, default_quality=80, attrs=None):
+        self.default_quality = default_quality
+
+        DimWidget = forms.NumberInput if allow_resize else forms.HiddenInput
+        QualWidget = forms.NumberInput if allow_quality else forms.HiddenInput
+
         widgets = (
             forms.FileInput(attrs={'accept': 'image/*'}),
-            forms.NumberInput(attrs={'placeholder': 'Max Width (px)', 'min': 1}),
-            forms.NumberInput(attrs={'placeholder': 'Max Height (px)', 'min': 1}),
-            forms.NumberInput(attrs={'placeholder': 'Quality (1-100)', 'min': 1, 'max': 100}),
+            DimWidget(attrs={'placeholder': 'Max Width (px)', 'min': 1}),
+            DimWidget(attrs={'placeholder': 'Max Height (px)', 'min': 1}),
+            QualWidget(attrs={'placeholder': 'Quality (1-100)', 'min': 1, 'max': 100}),
         )
         super().__init__(widgets, attrs)
 
     def decompress(self, value):
-        return [value, None, None, 80] if value else [None, None, None, 80]
+        return [value, None, None, self.default_quality] if value else [None, None, None, self.default_quality]
