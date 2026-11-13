@@ -1,8 +1,8 @@
 document.addEventListener("click", (e) => {
   const editBtn = e.target.closest(".image-card__action--edit");
   if (editBtn) {
-    const group = editBtn.closest(".image-card__name-group");
-    group.classList.add("image-card__name-group--editing");
+    const group = editBtn.closest(".image-card__title-group");
+    group.classList.add("image-card__title-group--editing");
     const input = group.querySelector(".image-card__input");
     input.focus();
     const val = input.value;
@@ -20,8 +20,8 @@ document.addEventListener("click", (e) => {
 document.addEventListener("focusout", (e) => {
   if (!e.target.matches(".image-card__input")) return;
 
-  const group = e.target.closest(".image-card__name-group");
-  group.classList.remove("image-card__name-group--editing");
+  const group = e.target.closest(".image-card__title-group");
+  group.classList.remove("image-card__title-group--editing");
 
   const titleSpan = group.querySelector(".image-card__title");
   titleSpan.textContent = e.target.value;

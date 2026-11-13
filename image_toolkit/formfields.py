@@ -11,6 +11,7 @@ from .widgets import ResizableImageWidget
 class ResizableImageFormField(forms.MultiValueField):
     def __init__(self, allow_resize=True, allow_quality=True, default_quality=80, **kwargs):
         self.default_quality = default_quality
+        max_length = kwargs.pop('max_length', None)
 
         fields = (
             forms.ImageField(required=kwargs.get('required', True)),
@@ -19,11 +20,11 @@ class ResizableImageFormField(forms.MultiValueField):
             forms.IntegerField(required=False, min_value=1, max_value=100),
         )
 
-        widget = ResizableImageWidget(
+        kwargs['widget'] = ResizableImageWidget(
             allow_resize=allow_resize, allow_quality=allow_quality, default_quality=default_quality
         )
 
-        super().__init__(fields, widget=widget, require_all_fields=False, **kwargs)
+        super().__init__(fields, require_all_fields=False, **kwargs)
 
     def compress(self, data_list):
         if not data_list or not data_list[0]:

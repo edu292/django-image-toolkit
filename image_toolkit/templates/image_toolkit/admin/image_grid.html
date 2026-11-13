@@ -29,7 +29,7 @@
                                     </svg>
                                 </a>
                             {% endif %}
-                            {% if cl.model_admin.edit_page %}
+                            {% if cl.model_admin.grid_edit_page %}
                                 <a href="{% url 'admin:'|add:cl.opts.app_label|add:'_'|add:cl.opts.model_name|add:'_change' result.pk %}"
                                    class="image-card__link">
                                     <img class="image-card__img"
@@ -46,13 +46,13 @@
                         {% endif %}
                     </figure>
                     <footer class="image-card__footer">
-                        <div class="image-card__name-group">
-                            <div class="image-card__name-display">
+                        <div class="image-card__title-group">
+                            <div class="image-card__title-display">
                                 <span class="image-card__title" title="{{ result.grid_title }}">{{ result.grid_title }}</span>
-                                {% if cl.model_admin.grid_enable_edit and result.grid_name_field %}
+                                {% if result.grid_form %}
                                     <button type="button"
                                             class="image-card__action image-card__action--edit"
-                                            title="{% translate 'Edit name' %}">
+                                            title="{% translate 'Edit title' %}">
                                         <svg width="12"
                                              height="12"
                                              viewBox="0 0 24 24"
@@ -66,17 +66,18 @@
                                     </button>
                                 {% endif %}
                             </div>
-                            {% if cl.model_admin.grid_enable_edit and result.grid_name_field %}
-                                <div class="image-card__name-edit">
-                                    <input type="hidden"
-                                           name="form-{{ forloop.counter0 }}-id"
-                                           value="{{ result.pk }}" />
-                                    <input type="text"
-                                           name="form-{{ forloop.counter0 }}-{{ result.grid_name_field }}"
-                                           value="{{ result.grid_title }}"
-                                           class="image-card__input"
-                                           required
-                                           aria-label="{% translate 'Edit name' %}" />
+                            {% if result.grid_form %}
+                                <div class="image-card__title-edit">
+                                    {% for hidden in result.grid_form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+                                    {{ result.grid_title_input }}
+                                    {% if result.grid_title_input.errors %}
+                                        <div class="image-card__errors">{{ result.grid_title_input.errors }}</div>
+                                    {% endif %}
+                                    {% if result.grid_form.non_field_errors %}
+                                        <div class="image-card__errors">{{ result.grid_form.non_field_errors }}</div>
+                                    {% endif %}
                                 </div>
                             {% endif %}
                         </div>

@@ -15,3 +15,14 @@ class HashedFileSystemStorage(FileSystemStorage):
         hash = hasher.hexdigest()
         hashed_filepath = original_filepath.parent / Path(hash + original_filepath.suffix)
         return super()._save(hashed_filepath, content)
+
+
+class OverwriteStorageMixin:
+    def get_available_name(self, name, max_length=None):
+        if self.exists(name):
+            self.delete(name)
+        return name
+
+
+class OverwriteFileSystemStorage(OverwriteStorageMixin, FileSystemStorage):
+    pass
